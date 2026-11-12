@@ -45,6 +45,22 @@ docker compose down
 API endpoints, image design, test evidence and the port and environment
 variable troubleshooting exercises are in [docs/docker.md](docs/docker.md).
 
+## CI/CD with Jenkins
+Every branch and pull request is built by Jenkins using the
+[`Jenkinsfile`](Jenkinsfile): checkout, validate, unit tests (JUnit report),
+Docker build, Compose + Redis smoke test, then reports and artifacts. A failing
+test or validation fails the build.
+
+Run the preconfigured local Jenkins:
+```bash
+cp jenkins/.env.example jenkins/.env      # set the admin and Redis CI passwords
+docker compose -f jenkins/docker-compose.yml up -d --build
+# open http://localhost:8095
+```
+
+Details, credentials handling and run evidence, including a diagnosed failed
+build: [docs/jenkins.md](docs/jenkins.md).
+
 ## Operations scripts
 Bash and Python scripts for routine checks live in `scripts/`:
 
