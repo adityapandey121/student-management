@@ -24,6 +24,7 @@ docs
 *.md
 Jenkinsfile
 jenkins
+ci
 docker-compose*.yml
 Dockerfile
 .dockerignore

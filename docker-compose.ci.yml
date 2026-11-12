@@ -1,0 +1,6 @@
+# CI override: use the image the pipeline just built and do not publish any
+# host ports, so parallel builds never clash over port 5000.
+services:
+  app:
+    image: student-management:${IMAGE_TAG:?IMAGE_TAG is set by the Jenkinsfile}
+    ports: !reset []
