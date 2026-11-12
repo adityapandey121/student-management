@@ -32,19 +32,25 @@ def check(name, condition, detail):
         sys.exit(1)
 
 
-status, body = call("GET", "/health")
-check("health", status == 200 and body.get("storage") == "redis", f"{status} {body}")
+def main():
+    status, body = call("GET", "/health")
+    check("health", status == 200 and body.get("storage") == "redis", f"{status} {body}")
 
-status, body = call("POST", "/students", STUDENT)
-check("add student", status == 201, f"{status} {body}")
+    status, body = call("POST", "/students", STUDENT)
+    check("add student", status == 201, f"{status} {body}")
 
-status, body = call("POST", "/students", STUDENT)
-check("duplicate rejected", status == 409, f"{status} {body}")
+    status, body = call("POST", "/students", STUDENT)
+    check("duplicate rejected", status == 409, f"{status} {body}")
 
-status, body = call("GET", f"/students/{STUDENT['id']}")
-check("get student", status == 200 and body == STUDENT, f"{status} {body}")
+    status, body = call("GET", f"/students/{STUDENT['id']}")
+    check("get student", status == 200 and body == STUDENT, f"{status} {body}")
 
-status, body = call("DELETE", f"/students/{STUDENT['id']}")
-check("delete student", status == 204, f"{status}")
+    status, body = call("DELETE", f"/students/{STUDENT['id']}")
+    check("delete student", status == 204, f"{status}")
 
-print("Smoke test passed")
+    print("Smoke test passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
