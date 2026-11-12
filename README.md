@@ -34,7 +34,7 @@ sample output.
 ## Running the tests
 ```bash
 python -m venv .venv
-. .venv/bin/activate            # Windows: .venv\Scriptsctivate
+. .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 python -m pytest -v
 ```
