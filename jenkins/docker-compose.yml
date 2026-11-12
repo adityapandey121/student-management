@@ -1,0 +1,16 @@
+# Local Jenkins: docker compose -f jenkins/docker-compose.yml up -d --build
+services:
+  jenkins:
+    build: .
+    ports:
+      - "8095:8080"
+    env_file: .env            # JENKINS_ADMIN_ID, JENKINS_ADMIN_PASSWORD, REDIS_CI_PASSWORD
+    group_add:
+      - "0"                   # group owning /var/run/docker.sock on Docker Desktop
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+volumes:
+  jenkins-home:
