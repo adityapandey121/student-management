@@ -1,6 +1,11 @@
 # Student Management System
 
-A beginner-friendly Python command-line project for practicing Git and GitHub.
+A beginner-friendly Python project for practicing Git, automation scripts,
+CI/CD with Jenkins and Docker. It contains:
+
+- `main.py`: the original interactive command-line app
+- `app.py`: the same features as a small web API (Flask), used for Docker
+- `scripts/`: operational Bash and Python scripts
 
 ## Features
 - Add students
@@ -16,8 +21,29 @@ A beginner-friendly Python command-line project for practicing Git and GitHub.
 
 ## Run the project
 ```bash
-python main.py
+python main.py                      # interactive CLI, no dependencies
+
+pip install -r requirements.txt     # web API
+python app.py                       # http://localhost:5000/health
 ```
+
+## Build and run with Docker
+```bash
+docker build -t student-management:latest .
+docker run -d --name sm -p 5000:5000 student-management:latest
+curl http://localhost:5000/health
+```
+
+With Redis via Docker Compose:
+```bash
+cp .env.example .env                # set REDIS_PASSWORD; .env is never committed
+docker compose up -d --build
+curl http://localhost:5000/health   # {"status":"ok","storage":"redis"}
+docker compose down
+```
+
+API endpoints, image design, test evidence and the port and environment
+variable troubleshooting exercises are in [docs/docker.md](docs/docker.md).
 
 ## Operations scripts
 Bash and Python scripts for routine checks live in `scripts/`:
@@ -50,4 +76,5 @@ python -m pytest -v
 8. Review and merge the PR, then update local `main`.
 
 ## Note
-This demo stores data in memory, so student records reset when the program exits.
+The CLI and the API without Redis store data in memory, so records reset when
+the program exits. With Docker Compose the data is kept in a Redis volume.
