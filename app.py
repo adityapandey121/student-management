@@ -44,7 +44,7 @@ def create_app(store=None) -> Flask:
 
     @app.get("/students/count")
     def count_students():
-        return jsonify(total=store.count())
+        return jsonify(count=store.count())
 
     @app.post("/students")
     def add_student():
