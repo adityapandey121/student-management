@@ -1,0 +1,29 @@
+# Version control and editor files
+.git
+.gitignore
+.gitattributes
+.vscode
+.idea
+
+# Secrets and local environments - must never end up in an image
+.env
+.env.*
+.venv
+
+# Python caches and test output
+__pycache__
+*.py[cod]
+.pytest_cache
+reports
+
+# Not needed at runtime
+tests
+scripts
+samples
+docs
+*.md
+Jenkinsfile
+jenkins
+docker-compose*.yml
+Dockerfile
+.dockerignore
