@@ -19,6 +19,26 @@ A beginner-friendly Python command-line project for practicing Git and GitHub.
 python main.py
 ```
 
+## Operations scripts
+Bash and Python scripts for routine checks live in `scripts/`:
+
+```bash
+bash scripts/disk_usage.sh -t 80 /                 # disk usage, warn above 80%
+bash scripts/log_analyser.sh samples/*.log          # ERROR/WARN/INFO counts
+python scripts/summarize.py samples/students.json   # JSON or text summary
+```
+
+See [docs/scripts.md](docs/scripts.md) for all options, error handling and
+sample output.
+
+## Running the tests
+```bash
+python -m venv .venv
+. .venv/bin/activate            # Windows: .venv\Scriptsctivate
+pip install -r requirements-dev.txt
+python -m pytest -v
+```
+
 ## GitHub practice workflow
 1. Create an empty GitHub repository named `student-management`.
 2. Initialize and push this project to `main`.
