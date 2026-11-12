@@ -77,7 +77,7 @@ def main():
         elif choice == "5":
             count_students()
         elif choice == "6":
-            print("Goodbye!")
+            print("Goodbye! Note: records are kept in memory and are lost on exit.")
             break
         else:
             print("Invalid choice. Please try again.")
