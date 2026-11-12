@@ -98,7 +98,7 @@ Branch `feature/jenkins-ci`:
 
 | Build | Commit | Result | Notes |
 |------:|--------|--------|-------|
-| #1 | `Add local Jenkins controller set up as code` | ❌ FAILURE | Unexpected failure in *Unit tests*. See "Failure 1" below. |
+| #1 | `c844de9` Add local Jenkins controller set up as code | ❌ FAILURE | Unexpected failure in *Unit tests*. See "Failure 1" below. |
 | #2 | `7952a24` Fix CI: stop pytest collecting ci/smoke_test.py | ✅ SUCCESS | 31/31 tests, smoke test passed, 7 artifacts archived |
 | #3 | `98ad638` Rename count response field to total | ❌ FAILURE | Deliberate safe failure. See "Failure 2" below. |
 | #4 | `9cd6321` Revert "Rename count response field to total" | ✅ SUCCESS | 31/31 tests, all stages green |
