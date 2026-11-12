@@ -2,7 +2,11 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
+from urllib.parse import urlsplit
+
+log = logging.getLogger(__name__)
 
 
 class DuplicateStudentError(Exception):
@@ -11,6 +15,8 @@ class DuplicateStudentError(Exception):
 
 class MemoryStore:
     name = "memory"
+    target = "in-process"
+    last_error = None
 
     def __init__(self) -> None:
         self._students: dict[str, dict] = {}
@@ -45,12 +51,20 @@ class RedisStore:
     def __init__(self, url: str) -> None:
         import redis  # imported lazily so tests and the CLI don't need Redis
 
+        parts = urlsplit(url)
+        # Never log the password: show only host, port and database.
+        self.target = f"{parts.hostname}:{parts.port or 6379}{parts.path}"
+        self.last_error = None
         self._redis = redis.Redis.from_url(url, decode_responses=True, socket_timeout=2)
 
     def ping(self) -> bool:
         try:
-            return bool(self._redis.ping())
-        except Exception:
+            ok = bool(self._redis.ping())
+            self.last_error = None
+            return ok
+        except Exception as exc:
+            self.last_error = f"{type(exc).__name__}: {exc}"
+            log.error("Redis at %s is unreachable: %s", self.target, self.last_error)
             return False
 
     def add(self, student: dict) -> None:

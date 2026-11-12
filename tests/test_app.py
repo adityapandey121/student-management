@@ -63,3 +63,11 @@ def test_health_reports_storage_down():
 
     response = create_app(DownStore()).test_client().get("/health")
     assert response.status_code == 503
+
+
+def test_redis_target_hides_password():
+    from storage import RedisStore
+
+    store = RedisStore("redis://:s3cret@cache.local:6380/1")
+    assert store.target == "cache.local:6380/1"
+    assert "s3cret" not in store.target

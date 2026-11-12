@@ -27,13 +27,15 @@ REQUIRED_FIELDS = ("id", "name", "course")
 def create_app(store=None) -> Flask:
     app = Flask(__name__)
     store = store or store_from_env()
+    logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(name)s: %(message)s")
     app.logger.setLevel(logging.INFO)
-    app.logger.info("Using %s storage", store.name)
+    app.logger.info("Using %s storage (%s)", store.name, store.target)
 
     @app.get("/health")
     def health():
         if not store.ping():
-            return jsonify(status="error", storage=store.name, detail="storage unreachable"), 503
+            return jsonify(status="error", storage=store.name, target=store.target,
+                           detail=store.last_error or "storage unreachable"), 503
         return jsonify(status="ok", storage=store.name)
 
     @app.get("/students")
