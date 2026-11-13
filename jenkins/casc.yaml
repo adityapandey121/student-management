@@ -44,6 +44,15 @@ jobs:
                     ref('pull/*/head')
                     nameMapping('PR-@{1}')
                   }
+                  // The git plugin looks PR commits up as both "origin/PR-N" and
+                  // "refs/pull/N/head", so fetch PR heads to both names.
+                  refSpecsSCMSourceTrait {
+                    templates {
+                      refSpecTemplate { value('+refs/heads/*:refs/remotes/@{remote}/*') }
+                      refSpecTemplate { value('+refs/pull/*/head:refs/remotes/@{remote}/PR-*') }
+                      refSpecTemplate { value('+refs/pull/*/head:refs/pull/*/head') }
+                    }
+                  }
                 }
               }
             }

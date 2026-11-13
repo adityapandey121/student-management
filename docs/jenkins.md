@@ -82,7 +82,7 @@ Pipeline Now* or wait 2 minutes.
 
 How it is wired:
 - `jenkins/Dockerfile`: Jenkins LTS 2.580.2 (JDK 21) + `python3`, `python3-venv`, the Docker CLI and the Compose plugin. Plugins come from `plugins.txt`, the setup wizard is disabled.
-- `jenkins/casc.yaml`: admin user, credential, and the Multibranch job (Job DSL).
+- `jenkins/casc.yaml`: admin user, credential, and the Multibranch job (Job DSL). It is copied to `/usr/share/jenkins/casc/`, outside the `jenkins_home` volume, so a rebuild always applies the latest version.
 - `jenkins/docker-compose.yml`: publishes port 8095 (8080 was already taken on the dev laptop) and mounts `/var/run/docker.sock` so the pipeline can build and run containers. `group_add: "0"` gives the `jenkins` user access to the socket without running Jenkins as root.
 
 > Mounting the Docker socket gives Jenkins full control of the host's Docker.
@@ -102,6 +102,14 @@ Branch `feature/jenkins-ci`:
 | #2 | `7952a24` Fix CI: stop pytest collecting ci/smoke_test.py | ✅ SUCCESS | 31/31 tests, smoke test passed, 7 artifacts archived |
 | #3 | `98ad638` Rename count response field to total | ❌ FAILURE | Deliberate safe failure. See "Failure 2" below. |
 | #4 | `9cd6321` Revert "Rename count response field to total" | ✅ SUCCESS | 31/31 tests, all stages green |
+| #5, #6 | docs commits | ✅ SUCCESS | Started automatically by the 2-minute scan after `git push` (push trigger) |
+
+Pull request `PR-3` (job created automatically when PR #3 was opened):
+
+| Build | Result | Notes |
+|------:|--------|-------|
+| #1, #2 | ❌ FAILURE | Jenkins could not check out the PR commit. See "Failure 3" below. |
+| #3 | ✅ SUCCESS | After fixing the PR refspecs: 31/31 tests, smoke test passed |
 
 ### Failure 1 (unplanned): pytest collected the smoke test
 
@@ -159,3 +167,40 @@ were skipped, so no broken image was built or tested.
 
 **Fix** (commit `9cd6321`): `git revert` the change, since the field is part of the
 public API. Build #4 passed with 31/31 tests.
+
+### Failure 3 (unplanned): Jenkins could not check out pull requests
+
+When PR #3 was opened, the scan created job `PR-3`, but the build failed in
+2 seconds, before any stage ran:
+
+```text
+> git fetch ... +refs/pull/*/head:refs/remotes/origin/pull/*/head
+> git rev-parse refs/pull/3/head^{commit}
+ERROR: Could not determine exact tip revision of PR-3; falling back to nondeterministic checkout
+> git rev-parse origin/PR-3^{commit}
+ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.
+Finished: FAILURE
+```
+
+**Diagnosis.** The fetch stored PR commits as `origin/pull/3/head`, but the
+git plugin then looked for them as `origin/PR-3` and `refs/pull/3/head`.
+Neither name existed, so there was nothing to build.
+
+**Fix.** In `jenkins/casc.yaml`, add explicit refspecs so PR heads are
+fetched to both names the plugin uses:
+
+```text
++refs/heads/*:refs/remotes/@{remote}/*
++refs/pull/*/head:refs/remotes/@{remote}/PR-*
++refs/pull/*/head:refs/pull/*/head
+```
+
+**Second problem found while fixing it.** After rebuilding Jenkins, the
+change had no effect. `casc.yaml` was copied to `/var/jenkins_home/casc.yaml`,
+but `/var/jenkins_home` is a Docker volume. A volume is filled from the image
+only the first time it is created, so the old file kept hiding every new
+version. The file now lives at `/usr/share/jenkins/casc/casc.yaml`, outside
+the volume, with `CASC_JENKINS_CONFIG` pointing to it. Every rebuild now
+applies the current configuration.
+
+After both fixes, `PR-3` build #3 passed (31/31 tests, smoke test passed).
