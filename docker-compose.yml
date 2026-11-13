@@ -1,0 +1,32 @@
+# App + Redis. Secrets come from a local .env file (copy .env.example), never
+# from this file or the image.
+services:
+  app:
+    build: .
+    image: student-management:latest
+    environment:
+      PORT: ${APP_PORT:-5000}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env (see .env.example)}@redis:6379/0
+    ports:
+      - "${HOST_PORT:-5000}:${APP_PORT:-5000}"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}", "--appendonly", "yes"]
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data:

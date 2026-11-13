@@ -1,0 +1,58 @@
+# Jenkins Configuration as Code. Secrets are injected from environment
+# variables (jenkins/.env), never written here.
+jenkins:
+  systemMessage: "Student Management CI (local lab)"
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              scope: GLOBAL
+              id: "redis-ci-password"
+              description: "Redis password for the CI smoke test"
+              secret: "${REDIS_CI_PASSWORD}"
+
+unclassified:
+  location:
+    url: "http://localhost:8095/"
+
+jobs:
+  - script: >
+      multibranchPipelineJob('student-management') {
+        displayName('student-management')
+        description('Builds every branch and every GitHub pull request (refs/pull/N/head) of the repo using its Jenkinsfile.')
+        branchSources {
+          branchSource {
+            source {
+              git {
+                id('student-management-git')
+                remote('https://github.com/adityapandey121/student-management.git')
+                traits {
+                  gitBranchDiscovery()
+                  discoverOtherRefsTrait {
+                    ref('pull/*/head')
+                    nameMapping('PR-@{1}')
+                  }
+                }
+              }
+            }
+          }
+        }
+        triggers {
+          periodicFolderTrigger { interval('2m') }
+        }
+        orphanedItemStrategy {
+          discardOldItems { numToKeep(10) }
+        }
+      }
