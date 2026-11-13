@@ -1,5 +1,19 @@
+# Python bytecode caches
 __pycache__/
 *.py[cod]
+
+# Local virtual environment
 .venv/
+
+# Local secrets / environment overrides - never commit
 .env
+
+# Editor settings
 .vscode/
+.idea/
+
+# Test and CI output
+.pytest_cache/
+reports/
+*.log
+!samples/*.log

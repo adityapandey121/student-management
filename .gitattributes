@@ -1,0 +1,7 @@
+# Normalise line endings so scripts work on Linux (Docker, Jenkins) even when
+# the repo is checked out on Windows with core.autocrlf=true.
+* text=auto
+*.sh text eol=lf
+Dockerfile text eol=lf
+Jenkinsfile text eol=lf
+*.py text eol=lf
